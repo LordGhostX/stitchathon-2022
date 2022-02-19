@@ -1,0 +1,49 @@
+{% extends "bootstrap/base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-12">
+      <div class="jumbotron text-center p-4">
+        <h2><img width="10%" src="{{ url_for('static', filename='stitch-burst-2.svg') }}"> StitchPay</h2>
+        <h5>Make and Receive Payments with Ease</h5>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="card text-center">
+        <div class="card-header">
+          Make Payments Quickly and Easily
+        </div>
+        <div class="card-body">
+          <p class="card-text">StitchPay allows you to transfer money to anyone easily.</p>
+          <a href="#" class="btn btn-lg btn-primary">Get Started</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card text-center">
+        <div class="card-header">
+          Receive Payments Across Borders
+        </div>
+        <div class="card-body">
+          <p class="card-text">StitchPay allows you to receive payments from anywhere in the world.</p>
+          <a href="#" class="btn btn-lg btn-primary">Get Started</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card text-center">
+        <div class="card-header">
+          Instant Money Disbursement
+        </div>
+        <div class="card-body">
+          <p class="card-text">StitchPay allows you to withdraw your money whenever you want.</p>
+          <a href="#" class="btn btn-lg btn-primary">Get Started</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
