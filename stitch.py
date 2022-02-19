@@ -42,4 +42,21 @@ def generate_client_token():
     return r.json()
 
 
-print(generate_client_token())
+def generate_pay_page(amount=1000, bank_id="united_bank_for_africa", account_number="1234567890", name="Test", reference="Test"):
+    query = """mutation MyMutation {
+  __typename
+  clientPaymentInitiationRequestCreate(input: {amount: {quantity: "%s", currency: "NGN"}, beneficiary: {bankAccount: {bankId: %s, accountNumber: "%s", name: "%s"}}, payerReference: "%s", beneficiaryReference: "%s"}) {
+    paymentInitiationRequest {
+      id
+      url
+    }
+  }
+}""" % (amount, bank_id, account_number, name, reference, reference)
+    headers = {
+        "Authorization": f"Bearer {generate_client_token()['access_token']}"
+    }
+    r = requests.post("https://api.stitch.money/graphql",
+                      json={"query": query}, headers=headers)
+    payment_url = r.json()[
+        "data"]["clientPaymentInitiationRequestCreate"]["paymentInitiationRequest"]["url"]
+    return f"{payment_url}?redirect_uri={os.getenv('STITCH_REDIRECT_URL')}"

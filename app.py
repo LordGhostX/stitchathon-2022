@@ -6,6 +6,7 @@ from flask_bootstrap import Bootstrap
 from flask_pymongo import PyMongo
 from dotenv import load_dotenv
 import utils
+import stitch
 
 load_dotenv()
 app = Flask(__name__)
@@ -150,6 +151,9 @@ def pay(username):
         if amount < 100:
             flash("you cannot transact lower than 100 NGN", "danger")
             return redirect(url_for("pay", username=username))
+
+        payment_url = stitch.generate_pay_page()
+        return redirect(payment_url)
 
     return render_template("pay.html", username=username)
 
