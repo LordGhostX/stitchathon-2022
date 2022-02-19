@@ -122,5 +122,16 @@ def dashboard(user_details):
     return "dashboard"
 
 
+@app.route("/pay/<string:username>/")
+def pay(username):
+    username = username.lower()
+
+    # throw error is username not found
+    if db.users.find_one({"username": username}) is None:
+        abort(404)
+
+    return render_template("pay.html", username=username)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
