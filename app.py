@@ -122,13 +122,34 @@ def dashboard(user_details):
     return "dashboard"
 
 
-@app.route("/pay/<string:username>/")
+@app.route("/pay/<string:username>/", methods=["GET", "POST"])
 def pay(username):
     username = username.lower()
 
     # throw error is username not found
     if db.users.find_one({"username": username}) is None:
         abort(404)
+
+    if request.method == "POST":
+        amount = request.form.get("amount", "0")
+        reference = request.form.get("reference", "stitch test")
+
+        # redirect if reference is more than 12 chars
+        if len(reference) > 12:
+            flash("payment reference cannot exceed 12 characters", "danger")
+            return redirect(url_for("pay", username=username))
+
+        # redirect is amount is not a valid number
+        try:
+            amount = int(amount)
+        except ValueError:
+            flash("please supply a valid transaction amount", "danger")
+            return redirect(url_for("pay", username=username))
+
+        # redirect if the amount is lower than 100 NGN
+        if amount < 100:
+            flash("you cannot transact lower than 100 NGN", "danger")
+            return redirect(url_for("pay", username=username))
 
     return render_template("pay.html", username=username)
 
