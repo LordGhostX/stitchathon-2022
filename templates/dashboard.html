@@ -1,0 +1,54 @@
+{% extends "bootstrap/base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-12">
+      <div class="jumbotron text-center p-4">
+        <h2><img width="10%" src="{{ url_for('static', filename='stitch-burst-2.svg') }}"> StitchPay</h2>
+        <h5>Welcome to your StitchPay dashboard!</h5>
+      </div>
+    </div>
+    <div class="col-lg-6 m-auto">
+      <h5>Update your bank details</h5>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+      <form method="POST">
+        <div class="form-group">
+          <label for="account_number">Account Number</label>
+          <input type="text" class="form-control" id="account_number" name="account_number" placeholder="Enter your account number" required>
+        </div>
+        <div class="form-group">
+          <label for="bank_name">Bank Name</label>
+          <input type="text" class="form-control" id="bank_name" name="bank_name" placeholder="Enter your bank name" required>
+        </div>
+        <div class="form-group">
+          <label for="account_number">Account Name</label>
+          <input type="text" class="form-control" id="account_name" name="account_name" placeholder="Enter your account name" required>
+        </div>
+        <div class="text-center">
+          <button type="submit" class="btn-lg btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+    <div class="col-lg-6 m-auto">
+      <h5>Your Payment Link</h5>
+      <form method="POST">
+        <div class="form-group">
+          <input type="text" class="form-control" value="http://127.0.0.1:5000{{ url_for('pay', username=user_details.username) }}" placeholder="Your payment link" readonly>
+        </div>
+        <div class="text-center">
+          <a href="http://127.0.0.1:5000{{ url_for('pay', username=user_details.username) }}" class="btn-lg btn btn-primary" target="_blank">Open Link</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -120,7 +120,7 @@ def authenticate_user():
 @app.route("/dashboard/")
 @login_required
 def dashboard(user_details):
-    return "dashboard"
+    return render_template("dashboard.html", user_details=user_details)
 
 
 @app.route("/pay/<string:username>/", methods=["GET", "POST"])
@@ -152,7 +152,8 @@ def pay(username):
             flash("you cannot transact lower than 100 NGN", "danger")
             return redirect(url_for("pay", username=username))
 
-        payment_url = stitch.generate_pay_page()
+        payment_url = stitch.generate_pay_page(
+            amount=amount, reference=reference)
         return redirect(payment_url)
 
     return render_template("pay.html", username=username)
