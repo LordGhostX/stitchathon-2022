@@ -11,7 +11,7 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 
 Bootstrap(app)
-db = PyMongo(app).db.stitchpay
+db = PyMongo(app).db
 
 
 @app.route("/")
@@ -26,21 +26,27 @@ def register():
 
 @app.route("/auth/register/", methods=["POST"])
 def create_user():
-    email = request.form.get("email")
-    username = request.form.get("username")
-    password = request.form.get("password")
+    email = request.form.get("email", "").lower()
+    username = request.form.get("username", "").lower()
+    password = request.form.get("password", "")
 
     # check for empty params
-    if None in [email, username, password]:
+    if "" in [email, username, password]:
         flash("registration form fields cannot be empty", "danger")
         return redirect(url_for("register"))
 
-    db.insert_one({
+    # check for data conflicts
+    query = {"$or": [{"email": email, "username": username}]}
+    if db.users.find_one(query) is not None:
+        flash("you cannot create multiple accounts with the same details", "danger")
+        return redirect(url_for("register"))
+
+    db.users.insert_one({
         "email": email,
         "username": username,
         "password": utils.hash_password(password)
     })
-    flash("you have successfully created a stitchpay account", "success")
+    flash("you have successfully created your StitchPay account", "success")
     return redirect(url_for("login"))
 
 
