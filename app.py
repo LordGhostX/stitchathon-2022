@@ -1,4 +1,6 @@
 import os
+import datetime
+from functools import wraps
 from flask import *
 from flask_bootstrap import Bootstrap
 from flask_pymongo import PyMongo
@@ -12,6 +14,33 @@ app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 
 Bootstrap(app)
 db = PyMongo(app).db
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # redirect if not logged in
+        if "session_id" not in session:
+            return redirect(url_for("login"))
+
+        session_id = db.session_ids.find_one(
+            {"session_id": session["session_id"]})
+
+        # redirect if session not found or has expired
+        if session_id is None or session_id["expiry_date"] <= datetime.datetime.now():
+            session.clear()
+            return redirect(url_for("login"))
+
+        user_details = db.users.find_one({"email": session_id["user_email"]})
+
+        # redirect if user not found
+        if user_details is None:
+            session.clear()
+            return redirect(url_for("login"))
+
+        return f(user_details, *args, **kwargs)
+
+    return decorated
 
 
 @app.route("/")
@@ -52,7 +81,45 @@ def create_user():
 
 @app.route("/auth/login/")
 def login():
+    if "session_id" in session:
+        return redirect(url_for("dashboard"))
+
     return render_template("login.html")
+
+
+@app.route("/auth/login/", methods=["POST"])
+def authenticate_user():
+    email = request.form.get("email", "").lower()
+    password = request.form.get("password", "")
+
+    # check for empty params
+    if "" in [email, password]:
+        flash("login form fields cannot be empty", "danger")
+        return redirect(url_for("login"))
+
+    # fetch user details
+    user_details = db.users.find_one({"email": email})
+
+    # validate user info
+    if user_details is None or not utils.verify_hash(password, user_details["password"]):
+        flash("you have supplied invalid login credentials", "danger")
+        return redirect(url_for("login"))
+
+    # generate session id
+    session_id = utils.gensalt().decode()
+    session["session_id"] = session_id
+    db.session_ids.insert_one({
+        "session_id": session_id,
+        "user_email": user_details["email"],
+        "expiry_date": datetime.datetime.now() + datetime.timedelta(days=3)
+    })
+    return redirect(url_for("dashboard"))
+
+
+@app.route("/dashboard/")
+@login_required
+def dashboard(user_details):
+    return "dashboard"
 
 
 if __name__ == "__main__":
